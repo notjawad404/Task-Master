@@ -1,4 +1,4 @@
-import AddTask from "./AddTask";
+
 import { useState } from "react";
 
 export default function TaskMaster() {
@@ -6,7 +6,7 @@ export default function TaskMaster() {
   return (
     <div>
       <h1>Task Master</h1>
-      <AddTask />
+      
       {tasks.length === 0 ? (
         <div>
           <p>No tasks available</p>
