@@ -19,7 +19,6 @@ mongoose.connect(URL, {
     console.log("Error Connecting to MongoDB: ", error.message);
 });
 
-// Define Task Schema and Model
 const taskSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String, required: true }
@@ -35,6 +34,29 @@ app.post('/tasks', async (req, res) => {
         res.json(task);
     } catch (error) {
         res.status(500).json({ message: 'Error saving task', error: error.message });
+    }
+});
+
+app.get('/tasks', async (req, res) => {
+    try {
+        const tasks = await Task.find();
+        res.json(tasks);
+    } catch (error) {
+        res.status(500).json({ message: 'Error getting tasks', error: error.message });
+    }
+});
+
+app.delete('/tasks/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const task = await Task.findById(id);
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+        await Task.findByIdAndDelete(id);
+        res.json({ message: 'Task deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting task', error: error.message });
     }
 });
 
