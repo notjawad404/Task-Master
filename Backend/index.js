@@ -19,12 +19,42 @@ mongoose.connect(URL, {
     console.log("Error Connecting to MongoDB: ", error.message);
 });
 
+// User Schema
+const userSchema = new mongoose.Schema({
+    email: { type: String, required: true },
+    password: { type: String, required: true }
+});
+
+const User = mongoose.model('User', userSchema);
+
+app.post('/auth', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // const existingUser = await User.findOne({ email });
+        // if (existingUser) {
+        //     return res.status(400).json({ message: 'Email already exists' });
+        // }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = new User({ email, password: hashedPassword });
+        await newUser.save();
+
+        res.status(201).json({ message: 'User created successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error signing up', error: error.message });
+    }
+});
+
+// Task Schema
 const taskSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String, required: true }
 });
 
 const Task = mongoose.model('Task', taskSchema);
+
 
 app.post('/tasks', async (req, res) => {
     try {
@@ -57,6 +87,24 @@ app.delete('/tasks/:id', async (req, res) => {
         res.json({ message: 'Task deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error deleting task', error: error.message });
+    }
+});
+
+app.put('/tasks/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, description } = req.body;
+        const task = await Task.findByIdAndUpdate(
+            id,
+            { name, description },
+            { new: true } // This option returns the updated document
+        );
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+        res.json(task);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating task', error: error.message });
     }
 });
 
