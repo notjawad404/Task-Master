@@ -29,14 +29,14 @@ export default function AddTask() {
                 placeholder="Task Name" 
                 value={taskName} 
                 onChange={(e) => setTaskName(e.target.value)}
-                className="w-1/2 m-auto rounded-full my-4 p-4 text-lg text-black"
+                className="w-1/2 m-auto rounded-xl my-4 p-4 text-lg text-black"
             />
-            <input 
+            <textarea 
                 type="text" 
                 placeholder="Task Description" 
                 value={taskDescription} 
                 onChange={(e) => setTaskDescription(e.target.value)}
-                className="w-1/2 m-auto rounded-full my-4 p-4 text-lg text-black"
+                className="w-1/2 m-auto rounded-xl my-4 p-4 text-lg text-black"
             />
             <button type="button" onClick={handleAddTask} className=" w-1/5 m-auto bg-green-400 text-black text-lg p-2 font-semibold rounded-full hover:bg-black hover:text-green-400">Add Task</button>
         </div>
