@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 export default function TaskMaster() {
   const [tasks, setTask] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
-  const [editFormData, setEditFormData] = useState({ name: '', description: '' });
+  const [editFormData, setEditFormData] = useState({ name: '', description: '', priority: '', dueDate: '' });
 
   useEffect(() => {
     axios.get("http://localhost:5000/tasks").then((response) => {
@@ -25,7 +25,7 @@ export default function TaskMaster() {
 
   const startEditingTask = (task) => {
     setEditingTask(task._id);
-    setEditFormData({ name: task.name, description: task.description });
+    setEditFormData({ name: task.name, description: task.description, priority: task.priority, dueDate: task.dueDate });
   };
 
   const handleEditChange = (e) => {
@@ -44,32 +44,49 @@ export default function TaskMaster() {
     }
   };
 
-  return (
-    <div className="bg-red-600 h-screen overflow-y-auto">
-      <h1 className="text-white font-bold text-center py-4 text-3xl">Task Master</h1>
+  const updateTaskStatus = async (task) => {
+    try {
+      const updatedTask = { ...task, status1: task.status1 === 'done' ? 'pending' : 'done' };
+      const response = await axios.put(`http://localhost:5000/tasks/${task._id}`, updatedTask);
+      setTask(tasks.map(t => (t._id === task._id ? response.data : t)));
+      console.log("Task status updated");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-      <div className="bg-green-400 w-3/4 m-auto px-4 py-2 rounded-xl">
-      {tasks.length === 0 ? (
-        <div className="bg-green-400 w-3/4 m-auto px-4 py-2">
-          <p className="text-lg text-center">No tasks available</p>
-        </div>
-      ) : (
-        tasks.map((task, index) => (
-            <div key={index}  className="bg-white w-full mx-auto my-3 rounded-xl px-3">
-              <div className="flex flex-row py-2">
-                <div className="w-4/5">
-                  <h3>{index + 1}{")"} <span className="text-lg font-semibold text-red-600">{task.name}</span></h3>
-                  <p>{task.description}</p>
+  return (
+    <div className="bg-gray-100 min-h-screen p-8">
+      <h1 className="text-4xl font-bold text-center text-red-600 mb-8">Task Master</h1>
+
+      <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        {tasks.length === 0 ? (
+          <div className="text-center">
+            <p className="text-lg text-gray-700">No tasks available</p>
+          </div>
+        ) : (
+          tasks.map((task, index) => (
+            <div key={task._id} className={`bg-gray-50 p-4 mb-4 rounded-lg ${task.status1 === 'done' ? 'line-through' : ''}`}>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-4">
+                  <input type="checkbox" checked={task.status1 === 'done'} onChange={() => updateTaskStatus(task)} className="h-5 w-5 text-green-600" />
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">{index + 1}. {task.name}</h3>
+                    <p className="text-gray-600">{task.description}</p>
+                    <p className="text-sm text-gray-500">Status: {task.status1}</p>
+                    <p className="text-sm text-gray-500">Priority: {task.priority}</p>
+                    <p className="text-sm text-gray-500">Due Date: {new Date(task.dueDate).toLocaleDateString()}</p>
+                  </div>
                 </div>
-                <div className="flex flex-row">
+                <div className="space-x-2">
                   <button
-                    className="bg-red-600 text-white p-2 mx-2 rounded-full w-20 h-10"
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                     onClick={() => startEditingTask(task)}
                   >
                     Edit
                   </button>
                   <button
-                    className="bg-red-600 text-white p-2 mx-2 lg:my-0 my-1 rounded-full w-20 h-10"
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
                     onClick={() => deleteTask(task._id)}
                   >
                     Delete
@@ -77,40 +94,58 @@ export default function TaskMaster() {
                 </div>
               </div>
               {editingTask === task._id && (
-                <div className="bg-white p-4 m-4 rounded shadow-md">
+                <div className="mt-4 bg-white p-4 rounded-lg shadow-inner">
                   <h2 className="text-xl font-bold mb-2">Edit Task</h2>
                   <input
                     type="text"
                     name="name"
                     value={editFormData.name}
                     onChange={handleEditChange}
-                    className="block w-full p-2 mb-2 border rounded"
+                    className="block w-full p-2 mb-2 border rounded-lg"
                     placeholder="Task Name"
                   />
                   <textarea
                     name="description"
                     value={editFormData.description}
                     onChange={handleEditChange}
-                    className="block w-full p-2 mb-2 border rounded"
+                    className="block w-full p-2 mb-2 border rounded-lg"
                     placeholder="Task Description"
                   ></textarea>
-                  <button
-                    className="bg-green-600 text-white p-2 rounded"
-                    onClick={() => submitEditTask(task._id)}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="bg-red-600 text-white p-2 rounded ml-2"
-                    onClick={() => setEditingTask(null)}
-                  >
-                    Cancel
-                  </button>
+                  <input
+                    type="text"
+                    name="priority"
+                    value={editFormData.priority}
+                    onChange={handleEditChange}
+                    className="block w-full p-2 mb-2 border rounded-lg"
+                    placeholder="Task Priority"
+                  />
+                  <input
+                    type="date"
+                    name="dueDate"
+                    value={editFormData.dueDate.split('T')[0]}
+                    onChange={handleEditChange}
+                    className="block w-full p-2 mb-2 border rounded-lg"
+                    placeholder="Due Date"
+                  />
+                  <div className="flex space-x-2">
+                    <button
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                      onClick={() => submitEditTask(task._id)}
+                    >
+                      Save
+                    </button>
+                    <button
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                      onClick={() => setEditingTask(null)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
-        ))
-      )}
+          ))
+        )}
       </div>
     </div>
   );
