@@ -6,8 +6,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const URL = 'mongodb+srv://jawad404:Jawad818@myhub.7k4rzfk.mongodb.net/?retryWrites=true&w=majority&appName=myhub';
-
+const URL = 'mongodb+srv://jawad404:Jawad818@myhub.7k4rzfk.mongodb.net/TaskMaster?retryWrites=true&w=majority&appName=myhub';
+ 
 mongoose.connect(URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -50,7 +50,12 @@ app.post('/auth', async (req, res) => {
 // Task Schema
 const taskSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    description: { type: String, required: true }
+    description: { type: String, required: true },
+    priority: { type: String, required: true } ,
+    status1: { type: String, required: true },
+    dueDate: { type: Date, required: true },
+    createdAt: { type: Date, default: Date.now }
+
 });
 
 const Task = mongoose.model('Task', taskSchema);
@@ -58,8 +63,9 @@ const Task = mongoose.model('Task', taskSchema);
 
 app.post('/tasks', async (req, res) => {
     try {
-        const { name, description } = req.body;
-        const task = new Task({ name, description });
+        const { name, description, priority, status1, dueDate, createdAt } = req.body;
+        const task = new Task({ name, description, priority, status1, dueDate, createdAt});
+        
         await task.save();
         res.json(task);
     } catch (error) {
@@ -93,10 +99,10 @@ app.delete('/tasks/:id', async (req, res) => {
 app.put('/tasks/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description } = req.body;
+        const { name, description, priority, status1, dueDate, createdAt} = req.body;
         const task = await Task.findByIdAndUpdate(
             id,
-            { name, description },
+            { name, description, priority, status1, dueDate, createdAt},
             { new: true } // This option returns the updated document
         );
         if (!task) {
