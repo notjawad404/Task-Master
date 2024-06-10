@@ -79,6 +79,7 @@ app.post('/auth/login', async (req, res) => {
 
 // Task Schema
 const taskSchema = new mongoose.Schema({
+    username: { type: String, required: true },
     name: { type: String, required: true },
     description: { type: String, required: true },
     priority: { type: String, required: true },
@@ -91,8 +92,8 @@ const Task = mongoose.model('Task', taskSchema);
 
 app.post('/tasks', async (req, res) => {
     try {
-        const { name, description, priority, status1, dueDate, createdAt } = req.body;
-        const task = new Task({ name, description, priority, status1, dueDate, createdAt });
+        const { username, name, description, priority, status1, dueDate, createdAt } = req.body;
+        const task = new Task({ username, name, description, priority, status1, dueDate, createdAt });
 
         await task.save();
         res.json(task);
@@ -127,7 +128,7 @@ app.delete('/tasks/:id', async (req, res) => {
 app.put('/tasks/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, priority, status1, dueDate, createdAt } = req.body;
+        const { username, name, description, priority, status1, dueDate, createdAt } = req.body;
         const task = await Task.findByIdAndUpdate(
             id,
             { name, description, priority, status1, dueDate, createdAt },

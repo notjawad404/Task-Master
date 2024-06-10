@@ -8,6 +8,7 @@ export default function AddTask() {
 
     const handleAddTask = () => {
         axios.post("http://localhost:5000/tasks", {
+            username: "admin",
             name: taskName,
             description: taskDescription,
             priority: "normal",

@@ -8,10 +8,13 @@ export default function TaskMaster() {
 
   useEffect(() => {
     axios.get("http://localhost:5000/tasks").then((response) => {
-      console.log(response.data);
-      setTask(response.data);
+      const userTasks = response.data.filter(task => task.username === 'admin');
+      console.log(userTasks);
+      setTask(userTasks);
+      // console.log(response.data);
+      // setTask(response.data);
     });
-  }, []);
+  }, ["admin"]);
 
   const deleteTask = async (id) => {
     try {
